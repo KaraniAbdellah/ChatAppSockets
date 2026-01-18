@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
+import javax.swing.plaf.synth.SynthTextAreaUI;
+
 public class Client {
     static public void createClient() {
         try {
@@ -17,25 +19,32 @@ public class Client {
 
             OutputStream outputStream = clientSocket.getOutputStream();
             PrintWriter printWriter = new PrintWriter(outputStream, true);
-
+            Scanner scanner = new Scanner(System.in);
             while (true) {
-                Scanner scanner = new Scanner(System.in);
-                System.out.print("Client: ");
-                String messageToServer = scanner.nextLine();
-                printWriter.println(messageToServer);
+                // Scanner scanner = new Scanner(System.in);
+                // System.out.print("Client: ");
+                // String messageToServer = scanner.nextLine();
+                // printWriter.println(messageToServer);
+
+                // String messageFromServer = bufferedReader.readLine();
+                // if (messageFromServer == null) {
+                // System.out.println("OPPS Server Stopped!!");
+                // break;
+                // }
+                // System.out.println("Server: " + messageFromServer);
 
                 String messageFromServer = bufferedReader.readLine();
-                if (messageFromServer == null) {
-                    System.out.println("OPPS Server Stopped!!");
-                    break;
-                }
-                System.out.println("Server: " + messageFromServer);
+                System.out.println(messageFromServer);
+
+                String messageToServer = scanner.nextLine();
+                printWriter.println(messageToServer);
             }
-        } catch(IOException io) {
+        } catch (IOException io) {
             System.out.println("Can not create Client Socket");
         }
     }
-    public static void main(String []args) {
+
+    public static void main(String[] args) {
         createClient();
     }
 }
