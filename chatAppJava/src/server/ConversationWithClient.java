@@ -1,22 +1,38 @@
 package server;
 
+import javax.sound.midi.SysexMessage;
 import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
-import java.util.Random;
+import java.util.ArrayList;
+
 
 public class ConversationWithClient extends Thread {
     private int numberOfClient;
     private int numberSecret;
     private Socket socket;
+    private ArrayList<ConversationWithClient> connections;
 
     public ConversationWithClient() {
 
     }
 
-    public ConversationWithClient(Socket socket, int numberOfClient) {
+    public ConversationWithClient(Socket socket, int numberOfClient, ArrayList<ConversationWithClient> connections) {
         this.numberOfClient = numberOfClient;
         this.socket = socket;
+        this.connections = connections;
+    }
+
+
+    public void broadCastMessage(String req, ArrayList<ConversationWithClient> connections) throws IOException {
+        // Here We can send message to all this clients
+        System.out.println("The Clients that We Have: " + connections.size());
+        for (int i = 0; i < connections.size(); i++) {
+            ConversationWithClient connection = connections.get(i);
+            OutputStream outputStream = connection.socket.getOutputStream();
+            PrintWriter printWriter = new PrintWriter(outputStream, true);
+            System.out.println("I am Client Number: " + connection.numberOfClient);
+            printWriter.println(req);
+        }
     }
 
     @Override
@@ -32,37 +48,10 @@ public class ConversationWithClient extends Thread {
             OutputStream outputStream = socket.getOutputStream();
             PrintWriter printWriter = new PrintWriter(outputStream, true);
 
-            Random r = new Random();
-            int num = r.nextInt(1000);
-            System.out.printf("Server generate %d?", num);
-            printWriter.println("Guest my Number ?");
-
             while (true) {
-                // String messageFromClient = bufferedReader.readLine();
-                // if (messageFromClient == null) {
-                // System.out.println("Client #" + this.numberOfClient + " Disconnect");
-                // break;
-                // }
-                // System.out.println("Client #" + this.numberOfClient + ": " +
-                // messageFromClient);
-
-                // Scanner scanner = new Scanner(System.in);
-                // System.out.print("Server: ");
-                // String messageToClient = scanner.nextLine();
-                // printWriter.println(messageToClient);
-                // printWriter.flush(); // send message if PrinterWriter take false
-
-                String numberFromServer = bufferedReader.readLine();
-                int numFromClient = Integer.parseInt(numberFromServer);
-                System.out.printf(">>>>> Client # %d Generated %d\n", this.numberOfClient, numFromClient);
-                if (numFromClient < num) {
-                    printWriter.println("Small Number, try It Again ?");
-                } else if (numFromClient > num) {
-                    printWriter.println("Big Number, try It Again ?");
-                } else {
-                    printWriter.println("Right NICE");
-                    break;
-                }
+                String messageFromClient = bufferedReader.readLine();
+                System.out.println("Message to All Clients" + messageFromClient);
+                broadCastMessage(messageFromClient, connections);
             }
         } catch (IOException e) {
             System.out.println("Can Not Start Conversation");

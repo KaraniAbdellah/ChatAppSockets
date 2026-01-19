@@ -7,6 +7,6 @@ public class Main {
     public static void main(String[] args) {
         // Start Server
         ServerMT serverMT = new ServerMT();
-        serverMT.createServerMT();
+//        serverMT.createServerMT();
     }
 }
