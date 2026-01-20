@@ -7,17 +7,15 @@ import java.util.ArrayList;
 
 
 public class ConversationWithClient extends Thread {
-    private int numberOfClient;
-    private int numberSecret;
+
+    private int myNumber;
     private Socket socket;
     private ArrayList<ConversationWithClient> connections;
-
     public ConversationWithClient() {
 
     }
-
-    public ConversationWithClient(Socket socket, int numberOfClient, ArrayList<ConversationWithClient> connections) {
-        this.numberOfClient = numberOfClient;
+    public ConversationWithClient(int myNumber, Socket socket, ArrayList<ConversationWithClient> connections) {
+        this.myNumber = myNumber;
         this.socket = socket;
         this.connections = connections;
     }
@@ -30,7 +28,7 @@ public class ConversationWithClient extends Thread {
             ConversationWithClient connection = connections.get(i);
             OutputStream outputStream = connection.socket.getOutputStream();
             PrintWriter printWriter = new PrintWriter(outputStream, true);
-            System.out.println("I am Client Number: " + connection.numberOfClient);
+            System.out.println(">>> Client #" + connection.myNumber + " || Send Message: " + req);
             printWriter.println(req);
         }
     }
@@ -38,7 +36,7 @@ public class ConversationWithClient extends Thread {
     @Override
     public void run() {
         // Start Conversation
-        System.out.println("Client #" + this.numberOfClient + " HERE");
+        System.out.println("Client #" + this.myNumber);
 
         try {
             InputStream inputStream = socket.getInputStream();
