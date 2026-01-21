@@ -12,10 +12,12 @@ import java.util.ArrayList;
 
 public class ServerChat extends Thread {
     private ArrayList<ConversationWithClient> connections;
-    private int numberOfClients;
+    private int numberOfActiveClients;
+    private int numberOfDesactiveClients;
 
     public ServerChat() {
-        this.numberOfClients = 0;
+        this.numberOfActiveClients = 0;
+        this.numberOfDesactiveClients = 0;
         this.connections = new ArrayList<ConversationWithClient>();
     }
 
@@ -30,9 +32,9 @@ public class ServerChat extends Thread {
                     Socket socket = serverSocket.accept();
                     System.out.println("New Connection Established In: " +
                             socket.getInetAddress() + "/" + socket.getLocalPort());
-                    this.numberOfClients++;
+                    this.numberOfActiveClients++;
                     ConversationWithClient conversationWithClient = new ConversationWithClient(
-                            this.numberOfClients, socket);
+                            this.numberOfActiveClients, socket);
                     this.connections.add(conversationWithClient);
                     conversationWithClient.start();
                 }
@@ -40,6 +42,14 @@ public class ServerChat extends Thread {
         } catch (Exception exception) {
             System.out.println("Error in Creating Server Socket");
         }
+    }
+
+    public void setNumberOfActiveClients() {
+        this.numberOfActiveClients--;
+    }
+
+    public void setNumberOfDisActiveClients() {
+        this.numberOfDesactiveClients++;
     }
 
     public class ConversationWithClient extends Thread {
@@ -52,9 +62,9 @@ public class ServerChat extends Thread {
         }
 
         public void broadCastMessage(String req, ArrayList<ConversationWithClient> connections) throws IOException {
-            // Here We can send message to all clients
+            // Here We can send message to all clients execept the client that send message
             System.out.println("The Clients that We Have: " + connections.size());
-            for (ConversationWithClient connection: connections) {
+            for (ConversationWithClient connection : connections) {
                 OutputStream outputStream = connection.socket.getOutputStream();
                 PrintWriter printWriter = new PrintWriter(outputStream, true);
                 System.out.println(">>> Client #" + connection.myNumber + " || Send Message: " + req);
@@ -79,9 +89,11 @@ public class ServerChat extends Thread {
                     String messageFromClient = bufferedReader.readLine();
                     // if (messageFromClient == null)
                     System.out.println("Message to All Clients" + messageFromClient);
+                    System.out.println(messageFromClient instanceof String);
                     if (messageFromClient == null) {
-                        // remove it from connections
-                        
+                        // remove client from connections
+                        setNumberOfActiveClients();
+                        setNumberOfDisActiveClients();
                         System.out.println("Client#" + this.myNumber + " Disconnect");
                         break;
                     }
