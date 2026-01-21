@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
-// Problem with this client should be asynchronous
 public class Client {
     static public void createClient() {
         try {
@@ -18,34 +17,35 @@ public class Client {
 
             OutputStream outputStream = clientSocket.getOutputStream();
             PrintWriter printWriter = new PrintWriter(outputStream, true);
-            System.out.println("Write something for users: ");
+
             Scanner scanner = new Scanner(System.in);
-            // Blocking Problem --> We need two threads (Send/Recieve)
-            Thread sender = new Sender(printWriter, scanner);
-            Thread reciever = new Reciever(bufferedReader);
-            while (true) {
-                try {
-                    sender.start();
-                    reciever.start();
 
-                    // What is Join Function
-                    sender.join();
-                    reciever.join();
-                } catch (InterruptedException ie) {
-                    System.out.println(ie);
-                }
+            try {
+                Thread sender = new Sender(printWriter, scanner);
+                Thread receiver = new Receiver(bufferedReader);
 
+                sender.start();
+                receiver.start();
+
+                sender.join();
+                receiver.join();
+                clientSocket.close();
+            } catch (InterruptedException ie) {
+                System.out.println("Thread interrupted: " + ie);
             }
+
+            clientSocket.close();
         } catch (IOException io) {
-            System.out.println("Can not create Client Socket");
+            System.out.println("Can not create Client Socket: " + io.getMessage());
         }
     }
 
+    // SENDER: Reads from keyboar and sends to server
     static class Sender extends Thread {
         PrintWriter printWriter;
         Scanner scanner;
 
-        public Sender(PrintWriter printWriter, Scanner scanner) throws IOException {
+        public Sender(PrintWriter printWriter, Scanner scanner) {
             this.printWriter = printWriter;
             this.scanner = scanner;
         }
@@ -53,30 +53,35 @@ public class Client {
         @Override
         public void run() {
             try {
-                String messageFromServer = this.scanner.nextLine();
-                System.out.println("Message From Server: " + messageFromServer);
+                System.out.println("You can start typing messages:");
+                while (true) {
+                    String messageToServer = this.scanner.nextLine();
+                    printWriter.println(messageToServer);
+                }
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println("Sender error: " + e.getMessage());
             }
         }
     }
 
-    static class Reciever extends Thread {
+    // RECEIVER: Reads from server and prints to console
+    static class Receiver extends Thread {
         BufferedReader bufferedReader;
 
-        public Reciever(BufferedReader bufferedReader) throws IOException {
+        public Receiver(BufferedReader bufferedReader) {
             this.bufferedReader = bufferedReader;
-
         }
 
         @Override
         public void run() {
-            String messageFromClientX;
             try {
-                messageFromClientX = bufferedReader.readLine();
-                System.out.println("Message From Client X: " + messageFromClientX);
+                String messageFromServer;
+                while (!(messageFromServer = bufferedReader.readLine()).equals("null")) {
+                    System.out.println("[OTHER CLIENT]: " + messageFromServer);
+                }
+                System.out.println("Connection closed by server.");
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("Receiver error: " + e.getMessage());
             }
         }
     }
@@ -85,9 +90,3 @@ public class Client {
         createClient();
     }
 }
-
-
-// Fix Send To Sender
-// Fix Client Disconnect or Server Disconnect
-// Make Client Send to Specific Client
-// ...

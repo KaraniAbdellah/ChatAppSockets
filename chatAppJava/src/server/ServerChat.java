@@ -77,7 +77,14 @@ public class ServerChat extends Thread {
 
                 while (true) {
                     String messageFromClient = bufferedReader.readLine();
+                    // if (messageFromClient == null)
                     System.out.println("Message to All Clients" + messageFromClient);
+                    if (messageFromClient == null) {
+                        // remove it from connections
+                        
+                        System.out.println("Client#" + this.myNumber + " Disconnect");
+                        break;
+                    }
                     broadCastMessage(messageFromClient, connections);
                 }
             } catch (IOException e) {
