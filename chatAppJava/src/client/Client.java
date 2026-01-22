@@ -53,7 +53,7 @@ public class Client {
         @Override
         public void run() {
             try {
-                System.out.println("You can start typing messages:");
+                System.out.println("type message ... (ClientNumber->Message):");
                 while (true) {
                     String messageToServer = this.scanner.nextLine();
                     printWriter.println(messageToServer);
@@ -75,11 +75,12 @@ public class Client {
         @Override
         public void run() {
             try {
-                String messageFromServer;
-                while (!(messageFromServer = bufferedReader.readLine()).equals("null")) {
-                    System.out.println("[OTHER CLIENT]: " + messageFromServer);
+                String messageFromServer = bufferedReader.readLine();
+                while (messageFromServer != null) {
+                    System.out.println(messageFromServer);
+                    messageFromServer = bufferedReader.readLine();
                 }
-                System.out.println("Connection closed by server.");
+                System.out.println("Connection closed by server. Try to Connect Again");
             } catch (IOException e) {
                 System.out.println("Receiver error: " + e.getMessage());
             }

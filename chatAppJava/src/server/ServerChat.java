@@ -61,9 +61,13 @@ public class ServerChat extends Thread {
             this.socket = socket;
         }
 
-        public void broadCastMessage(String req, ArrayList<ConversationWithClient> connections) throws IOException {
+        public int getMyNumber() {
+            return myNumber;
+        }
+
+        public void broadCastMessage(String req) throws IOException {
             // Here We can send message to all clients execept the client that send message
-            System.out.println("The Clients that We Have: " + connections.size());
+            System.out.println("We Have: " + connections.size());
             for (ConversationWithClient connection : connections) {
                 if (connection.equals(this)) {
                     continue;
@@ -72,6 +76,44 @@ public class ServerChat extends Thread {
                 PrintWriter printWriter = new PrintWriter(outputStream, true);
                 System.out.println(">>> Client #" + connection.myNumber + " || Send Message: " + req);
                 printWriter.println("Client #" + this.myNumber + ": " + req);
+            }
+        }
+
+        public void broadCastMessageToClientX(String req, int clientNumber) throws IOException {
+            // Get Index of Client
+            ConversationWithClient targetClient = null;
+            for (ConversationWithClient connection : connections) {
+                // if (connection)
+                if (connection.getMyNumber() == clientNumber) {
+                    targetClient = connection;
+                    System.out.println("The Reciver is: " + clientNumber);
+                    break;
+                }
+            }
+            if (targetClient == null) {
+                System.out.println("There is no Client With this number");
+                return;
+            } else {
+                OutputStream outputStream = targetClient.socket.getOutputStream();
+                PrintWriter printWriter = new PrintWriter(outputStream, true);
+                System.out.println(">>> Client #" + targetClient.myNumber + " || Send Message: " + req);
+                printWriter.println("Client #" + this.myNumber + ": " + req);
+            }
+        }
+
+        public int getClientNumber(String req) {
+            // ClientNumber->Message
+            //  22-->Hello
+            //  e-->Hello
+            //  -->Hello
+            //  +1-->Hello
+            //  1-->Hello
+            if ((req.contains("-"))) {
+                int index = req.indexOf("-") - 1;
+                if (index == 0) return -1; 
+                
+            } else {
+                return -1;
             }
         }
 
@@ -84,15 +126,8 @@ public class ServerChat extends Thread {
                 InputStream inputStream = socket.getInputStream();
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-                OutputStream outputStream = socket.getOutputStream();
-                PrintWriter printWriter = new PrintWriter(outputStream, true);
-
                 while (true) {
                     String messageFromClient = bufferedReader.readLine();
-                    // if (messageFromClient == null)
-                    System.out.println("Message to All Clients" + messageFromClient);
-                    System.out.println(messageFromClient instanceof String);
                     if (messageFromClient == null) {
                         int clientIndex = connections.indexOf(this);
                         connections.remove(clientIndex);
@@ -102,12 +137,17 @@ public class ServerChat extends Thread {
                     if (connections.size() == 1) {
                         System.out.println("No Client Here !");
                     }
-                    broadCastMessage(messageFromClient, connections);
+                    // Get Number Of Client
+                    System.out.println("With This Message I can Extract Number Of Client: " + messageFromClient);
+                    // ClientNumber->Message
+
+                    int clientNumber = 1;
+                    broadCastMessageToClientX(messageFromClient, clientNumber);
+                    // broadCastMessage(messageFromClient);
                 }
             } catch (IOException e) {
                 System.out.println("Can Not Start Conversation");
             }
-
         }
     }
 
