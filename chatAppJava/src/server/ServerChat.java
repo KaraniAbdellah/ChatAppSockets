@@ -111,7 +111,7 @@ public class ServerChat extends Thread {
             if ((req.contains("-"))) {
                 int index = req.indexOf("-") - 1;
                 if (index == 0) return -1; 
-                
+                return 0;
             } else {
                 return -1;
             }
