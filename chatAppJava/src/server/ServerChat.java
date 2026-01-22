@@ -65,10 +65,13 @@ public class ServerChat extends Thread {
             // Here We can send message to all clients execept the client that send message
             System.out.println("The Clients that We Have: " + connections.size());
             for (ConversationWithClient connection : connections) {
+                if (connection.equals(this)) {
+                    continue;
+                }
                 OutputStream outputStream = connection.socket.getOutputStream();
                 PrintWriter printWriter = new PrintWriter(outputStream, true);
                 System.out.println(">>> Client #" + connection.myNumber + " || Send Message: " + req);
-                printWriter.println(req);
+                printWriter.println("Client #" + this.myNumber + ": " + req);
             }
         }
 
@@ -91,11 +94,13 @@ public class ServerChat extends Thread {
                     System.out.println("Message to All Clients" + messageFromClient);
                     System.out.println(messageFromClient instanceof String);
                     if (messageFromClient == null) {
-                        // remove client from connections
-                        setNumberOfActiveClients();
-                        setNumberOfDisActiveClients();
-                        System.out.println("Client#" + this.myNumber + " Disconnect");
+                        int clientIndex = connections.indexOf(this);
+                        connections.remove(clientIndex);
+                        System.out.println("Client#" + (clientIndex + 1) + " Disconnect");
                         break;
+                    }
+                    if (connections.size() == 1) {
+                        System.out.println("No Client Here !");
                     }
                     broadCastMessage(messageFromClient, connections);
                 }
