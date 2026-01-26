@@ -13,11 +13,9 @@ import java.util.ArrayList;
 public class ServerChat extends Thread {
     private ArrayList<ConversationWithClient> connections;
     private int numberOfActiveClients;
-    private int numberOfDesactiveClients;
 
     public ServerChat() {
         this.numberOfActiveClients = 0;
-        this.numberOfDesactiveClients = 0;
         this.connections = new ArrayList<ConversationWithClient>();
     }
 
@@ -48,10 +46,6 @@ public class ServerChat extends Thread {
         this.numberOfActiveClients--;
     }
 
-    public void setNumberOfDisActiveClients() {
-        this.numberOfDesactiveClients++;
-    }
-
     public class ConversationWithClient extends Thread {
         private int myNumber;
         private Socket socket;
@@ -59,6 +53,42 @@ public class ServerChat extends Thread {
         public ConversationWithClient(int myNumber, Socket socket) {
             this.myNumber = myNumber;
             this.socket = socket;
+        }
+
+        public String sliceString(String str, int event) {
+            if (str == null || !str.contains(">"))
+                return null;
+
+            String[] parts = str.split(">");
+
+            if (event == 1) {
+                return parts[0];
+            } else if (event == 2) {
+                return parts.length > 1 ? parts[1] : null;
+            } else {
+                return null;
+            }
+        }
+
+        public int getClientNumber(String req) {
+            // Message>ClientNumber
+            // 22>Hello
+            // e>Hello
+            // >Hello
+            // +1>Hello
+            // 1>Hello
+            if (req.isEmpty())
+                return -1;
+            if (!Character.isDigit(req.charAt(0))) {
+                return -1; // send message to anyOne
+            }
+            if ((req.contains("-"))) {
+                int index = req.indexOf("-") - 1;
+                req.split(req, index);
+                return 0;
+            } else {
+                return -1;
+            }
         }
 
         public int getMyNumber() {
@@ -74,47 +104,40 @@ public class ServerChat extends Thread {
                 }
                 OutputStream outputStream = connection.socket.getOutputStream();
                 PrintWriter printWriter = new PrintWriter(outputStream, true);
-                System.out.println(">>> Client #" + connection.myNumber + " || Send Message: " + req);
-                printWriter.println("Client #" + this.myNumber + ": " + req);
+                System.out.println(">>> Client #" + connection.myNumber + " Send Message: " + req);
+                printWriter.println("Client#" + this.myNumber + " :" + req);
             }
         }
 
-        public void broadCastMessageToClientX(String req, int clientNumber) throws IOException {
+        public void broadCastMessageToClientX(String req, int clientNumber) {
             // Get Index of Client
             ConversationWithClient targetClient = null;
             for (ConversationWithClient connection : connections) {
                 // if (connection)
-                if (connection.getMyNumber() == clientNumber) {
+                if (connection.myNumber == clientNumber) {
                     targetClient = connection;
-                    System.out.println("The Reciver is: " + clientNumber);
                     break;
                 }
             }
-            if (targetClient == null) {
-                System.out.println("There is no Client With this number");
-                return;
-            } else {
-                OutputStream outputStream = targetClient.socket.getOutputStream();
-                PrintWriter printWriter = new PrintWriter(outputStream, true);
-                System.out.println(">>> Client #" + targetClient.myNumber + " || Send Message: " + req);
-                printWriter.println("Client #" + this.myNumber + ": " + req);
-            }
-        }
 
-        public int getClientNumber(String req) {
-            // ClientNumber->Message
-            //  22-->Hello
-            //  e-->Hello
-            //  -->Hello
-            //  +1-->Hello
-            //  1-->Hello
-            if ((req.contains("-"))) {
-                int index = req.indexOf("-") - 1;
-                if (index == 0) return -1; 
-                return 0;
-            } else {
-                return -1;
+            try {
+                OutputStream outputStream = socket.getOutputStream();
+                PrintWriter printWriter = new PrintWriter(outputStream, true);
+
+                System.out.println("Exception in I/O");
+                if (targetClient == null) {
+                    System.out.println("There is no Client With this number");
+                    printWriter.println("Can not find this client");
+                    return;
+                } else {
+                    System.out.println(">>> Client #" + targetClient.myNumber + " Send Message: " + req + " to Client#"
+                            + clientNumber);
+                    printWriter.println("Client #" + this.myNumber + ": " + req);
+                }
+            } catch (Exception e) {
+                System.out.println("Exception in I/O");
             }
+
         }
 
         @Override
@@ -123,9 +146,14 @@ public class ServerChat extends Thread {
             System.out.println("Client #" + this.myNumber);
 
             try {
+                // Recive Messages
                 InputStream inputStream = socket.getInputStream();
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                // Send Messages
+                OutputStream outputStream = this.socket.getOutputStream();
+                PrintWriter printWriter = new PrintWriter(outputStream, true);
                 while (true) {
                     String messageFromClient = bufferedReader.readLine();
                     if (messageFromClient == null) {
@@ -134,16 +162,38 @@ public class ServerChat extends Thread {
                         System.out.println("Client#" + (clientIndex + 1) + " Disconnect");
                         break;
                     }
-                    if (connections.size() == 1) {
-                        System.out.println("No Client Here !");
-                    }
-                    // Get Number Of Client
-                    System.out.println("With This Message I can Extract Number Of Client: " + messageFromClient);
-                    // ClientNumber->Message
 
-                    int clientNumber = 1;
-                    broadCastMessageToClientX(messageFromClient, clientNumber);
-                    // broadCastMessage(messageFromClient);
+                    // Remove Space in Messsage from client (Left & Right)
+                    messageFromClient = messageFromClient.trim();
+
+                    // Check if Message Match Menu Characters
+                    if (messageFromClient.equals("d")) {
+                        // Send To This Client all CLients That Exists
+                        for (ConversationWithClient con : connections) {
+                            if (con.socket != this.socket) {
+                                printWriter.println("Client List: ");
+                                printWriter.println("Client #" + con.myNumber + " " + con.socket.getLocalAddress() + "/"
+                                        + con.socket.getPort());
+                            }
+                        }
+                        continue;
+                    }
+
+                    if (connections.size() == 1) {
+                        printWriter.println("No Client Here !");
+                        continue;
+                    }
+
+                    // Get Number Of Client [MESSAGE FORMAT: ClientNumber->Message]
+                    String messageToSend = sliceString(messageFromClient, 2);
+                    String clientToSend = sliceString(messageFromClient, 1);
+                    System.out.println(messageToSend + clientToSend);
+                    if (messageToSend == null || clientToSend == null) {
+                        broadCastMessage(messageFromClient);
+                        continue;
+                    }
+                    int clientNumber = Integer.parseInt(clientToSend);
+                    broadCastMessageToClientX(messageToSend, clientNumber);
                 }
             } catch (IOException e) {
                 System.out.println("Can Not Start Conversation");

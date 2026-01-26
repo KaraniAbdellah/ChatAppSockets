@@ -53,7 +53,14 @@ public class Client {
         @Override
         public void run() {
             try {
-                System.out.println("type message ... (ClientNumber->Message):");
+                System.out.println("========================================");
+                System.out.println(" Type your message");
+                System.out.println(" Format : ClientNumber > Message");
+                System.out.println("----------------------------------------");
+                System.out.println(" d        : Display all users");
+                System.out.println(" CTRL + C : Exit connection");
+                System.out.println("========================================");
+
                 while (true) {
                     String messageToServer = this.scanner.nextLine();
                     printWriter.println(messageToServer);
