@@ -1,12 +1,3 @@
-<div style="text-center">
-
-- **Java** ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=java&logoColor=white) : Core programming language
-- **Java Sockets** ![Sockets](https://img.shields.io/badge/Socket-00599C?style=for-the-badge&logo=javascript&logoColor=white) : Network communication
-- **Java Multithreading** ![Threads](https://img.shields.io/badge/Multithreading-6DB33F?style=for-the-badge&logo=java&logoColor=white) : Concurrent client handling
-- **Nodemon** ![Nodemon](https://img.shields.io/badge/Nodemon-76D04B?style=for-the-badge&logo=nodemon&logoColor=white) : Development automation (optional)
-
-</div>
-
 <img src="/imgs/intro.png">
 
 # Chat Application - Java Socket & Multithreading
@@ -14,6 +5,14 @@
 A chat application built with Java that uses socket programming and multithreading concepts. This application enables multiple clients to communicate over a network through a server.
 
 This project was developed as part of a study on network programming in Java.
+
+<div align="center">
+
+- **Java Sockets** ![Sockets](https://img.shields.io/badge/Socket-00599C?style=for-the-badge&logo=javascript&logoColor=white)
+- **Java Multithreading** ![Threads](https://img.shields.io/badge/Multithreading-6DB33F?style=for-the-badge&logo=java&logoColor=white)
+- **Nodemon** ![Nodemon](https://img.shields.io/badge/Nodemon-76D04B?style=for-the-badge&logo=nodemon&logoColor=white)
+
+</div>
 
 ### Features:
 --> client#1 sends message to client#2.  
