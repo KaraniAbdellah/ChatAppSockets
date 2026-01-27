@@ -9,7 +9,7 @@ This project was developed as part of a study on network programming in Java.
 <div align="center">
 
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=java&logoColor=white) 
-![Sockets](https://img.shields.io/badge/Socket-00599C?style=for-the-badge&logo=javascript&logoColor=white)
+![Java](https://img.shields.io/badge/Sockets-ED8B00?style=for-the-badge&logo=java&logoColor=white)
 ![Threads](https://img.shields.io/badge/Multithreading-6DB33F?style=for-the-badge&logo=java&logoColor=white)
 ![Nodemon](https://img.shields.io/badge/Nodemon-76D04B?style=for-the-badge&logo=nodemon&logoColor=white)
 
