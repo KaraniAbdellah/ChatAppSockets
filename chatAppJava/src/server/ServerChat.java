@@ -121,15 +121,16 @@ public class ServerChat extends Thread {
             }
 
             try {
-                OutputStream outputStream = socket.getOutputStream();
-                PrintWriter printWriter = new PrintWriter(outputStream, true);
 
                 System.out.println("Exception in I/O");
+
                 if (targetClient == null) {
+                    PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
                     System.out.println("There is no Client With this number");
                     printWriter.println("Can not find this client");
                     return;
                 } else {
+                    PrintWriter printWriter = new PrintWriter(targetClient.socket.getOutputStream(), true);
                     System.out.println(">>> Client #" + targetClient.myNumber + " Send Message: " + req + " to Client#"
                             + clientNumber);
                     printWriter.println("Client #" + this.myNumber + ": " + req);
@@ -169,9 +170,13 @@ public class ServerChat extends Thread {
                     // Check if Message Match Menu Characters
                     if (messageFromClient.equals("d")) {
                         // Send To This Client all CLients That Exists
+                        printWriter.println("Client List: ");
+                        if (connections.size() == 0) {
+                            printWriter.println("No Client Found");
+                            continue;
+                        }
                         for (ConversationWithClient con : connections) {
                             if (con.socket != this.socket) {
-                                printWriter.println("Client List: ");
                                 printWriter.println("Client #" + con.myNumber + " " + con.socket.getLocalAddress() + "/"
                                         + con.socket.getPort());
                             }
@@ -184,14 +189,14 @@ public class ServerChat extends Thread {
                         continue;
                     }
 
-                    // Get Number Of Client [MESSAGE FORMAT: ClientNumber->Message]
+                    // Get Number Of Client [MESSAGE FORMAT: ClientNumber > Message]
                     String messageToSend = sliceString(messageFromClient, 2);
                     String clientToSend = sliceString(messageFromClient, 1);
-                    System.out.println(messageToSend + clientToSend);
                     if (messageToSend == null || clientToSend == null) {
                         broadCastMessage(messageFromClient);
                         continue;
                     }
+                    clientToSend = clientToSend.trim();
                     int clientNumber = Integer.parseInt(clientToSend);
                     broadCastMessageToClientX(messageToSend, clientNumber);
                 }
