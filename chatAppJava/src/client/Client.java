@@ -5,11 +5,15 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class Client {
+    public static String GREEN = "\u001B[32m";
+    public static String RESET = "\u001B[0m";
+    public static String BLUE = "\u001B[34m";
+
     static public void createClient() {
         try {
             Socket clientSocket = new Socket("127.0.0.1", 1234);
-            System.out.println("My Port is " + clientSocket.getLocalAddress() + "/"
-                    + clientSocket.getLocalPort());
+            System.out.println(BLUE + "My Port is " + clientSocket.getLocalAddress() + "/"
+                    + clientSocket.getLocalPort() + RESET);
 
             InputStream inputStream = clientSocket.getInputStream();
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -53,13 +57,14 @@ public class Client {
         @Override
         public void run() {
             try {
-                System.out.println("========================================");
+
+                System.out.println(GREEN + "========================================");
                 System.out.println(" Type your message");
                 System.out.println(" Format : ClientNumber > Message");
                 System.out.println("----------------------------------------");
                 System.out.println(" d        : Display all users");
                 System.out.println(" CTRL + C : Exit connection");
-                System.out.println("========================================");
+                System.out.println("========================================" + RESET);
 
                 while (true) {
                     String messageToServer = this.scanner.nextLine();
