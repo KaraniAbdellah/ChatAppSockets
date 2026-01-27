@@ -15,12 +15,11 @@ This project was developed as part of a study on network programming in Java.
 
 </div>
 
-### Features:
---> client#1 sends message to client#2.  
---> client can send message to all clients.  
---> client can see all clients that are connected to the app.  
---> **NOTE**: All messages pass by the server (means: client sends to server and then server sends to client)
-
+### Features
+- **Direct Messaging**: Client #1 can send messages to Client #2.  
+- **Broadcast Messaging**: Clients can send messages to all connected clients.  
+- **Client List**: Clients can see all other clients connected to the app.  
+- **Note**: All messages pass through the server (i.e., a client sends a message to the server, which then forwards it to the intended client(s)).
 
 ## Overview Of How it Works:
 
